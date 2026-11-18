@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BPO Call Centre Payroll & Multi-Team Portal</title>
+  
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- SheetJS (xlsx) for Multi-Sheet Excel Export -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    /* ==========================================================================
+       LINCOLN FINANCIAL CORPORATE DESIGN TOKENS & EXECUTIVE CSS
+       ========================================================================== */
+    :root {
+      --lf-burgundy: #862633;
+      --lf-burgundy-dark: #691b26;
+      --lf-burgundy-light: #fdf2f4;
+      --lf-navy: #002D62;
+      --lf-navy-dark: #001f44;
+      --lf-navy-light: #eef4fb;
+      --lf-gold: #C59B27;
+      --lf-gold-light: #fbf7eb;
+      --lf-slate-bg: #F4F6F9;
+      --lf-surface: #FFFFFF;
+      --lf-border: #DCE2EC;
+      --lf-text-main: #1E293B;
+      --lf-text-muted: #64748B;
+      --lf-success: #0F766E;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--lf-slate-bg);
+      color: var(--lf-text-main);
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, .brand-font {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* Executive Top Navigation Bar */
+    .lf-header {
+      background: linear-gradient(135deg, var(--lf-navy) 0%, var(--lf-navy-dark) 62%, var(--lf-burgundy-dark) 100%);
+      border-bottom: 4px solid var(--lf-gold);
+      box-shadow: 0 4px 22px rgba(0, 45, 98, 0.2);
+    }
+
+    .lf-badge-gold {
+      background-color: rgba(197, 155, 39, 0.16);
+      border: 1px solid rgba(197, 155, 39, 0.55);
+      color: #FDE68A;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    /* Team Switcher Strip */
+    .team-bar {
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--lf-border);
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+    }
+
+    /* Executive KPI Summary Cards */
+    .kpi-card {
+      background: var(--lf-surface);
+      border-radius: 14px;
+      border: 1px solid var(--lf-border);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(0, 45, 98, 0.09);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+    }
+
+    .kpi-navy::before { background-color: var(--lf-navy); }
+    .kpi-burgundy::before { background-color: var(--lf-burgundy); }
+    .kpi-gold::before { background-color: var(--lf-gold); }
+    .kpi-teal::before { background-color: var(--lf-success); }
+
+    /* Corporate Buttons */
+    .btn-burgundy {
+      background: linear-gradient(180deg, var(--lf-burgundy) 0%, var(--lf-burgundy-dark) 100%);
+      color: #FFFFFF;
+      border: 1px solid var(--lf-burgundy-dark);
+      border-radius: 10px;
+      font-weight: 600;
+      box-shadow: 0 3px 10px rgba(134, 38, 51, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    .btn-burgundy:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(134, 38, 51, 0.32);
+    }
+
+    .btn-navy {
+      background: linear-gradient(180deg, var(--lf-navy) 0%, var(--lf-navy-dark) 100%);
+      color: #FFFFFF;
+      border: 1px solid var(--lf-navy-dark);
+      border-radius: 10px;
+      font-weight: 600;
+      box-shadow: 0 3px 10px rgba(0, 45, 98, 0.22);
+      transition: all 0.2s ease;
+    }
+
+    .btn-navy:hover {
+      filter: brightness(1.12);
+      transform: translateY(-1px);
+    }
+
+    .btn-gold {
+      background: linear-gradient(180deg, #d4a82e 0%, #b58b1d 100%);
+      color: #FFFFFF;
+      border: 1px solid #9e7816;
+      border-radius: 10px;
+      font-weight: 600;
+      box-shadow: 0 3px 10px rgba(197, 155, 39, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    .btn-gold:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: #FFFFFF;
+      color: var(--lf-navy);
+      border: 1.5px solid var(--lf-border);
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .btn-outline:hover {
+      border-color: var(--lf-navy);
+      background: var(--lf-navy-light);
+    }
+
+    /* Main Payroll Ledger Container */
+    .ledger-panel {
+      background: var(--lf-surface);
+      border-radius: 16px;
+      border: 1px solid var(--lf-border);
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.05);
+    }
+
+    /* Table Styling & Inline Editable Cells */
+    .payroll-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .payroll-table thead th {
+      background-color: var(--lf-navy);
+      color: #FFFFFF;
+      font-size: 0.71rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 13px 9px;
+      border-bottom: 3px solid var(--lf-gold);
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .payroll-table thead th.calc-header {
+      background-color: var(--lf-burgundy);
+    }
+
+    .payroll-table tbody tr {
+      transition: background-color 0.15s ease;
+    }
+
+    .payroll-table tbody tr:nth-child(even) {
+      background-color: #FAFBFD;
+    }
+
+    .payroll-table tbody tr:hover {
+      background-color: var(--lf-navy-light);
+    }
+
+    .payroll-table td {
+      padding: 9px 7px;
+      border-bottom: 1px solid #E2E8F0;
+      font-size: 0.83rem;
+      vertical-align: middle;
+    }
+
+    /* Inline Editable Input Styling */
+    .cell-input {
+      width: 100%;
+      padding: 5px 7px;
+      border: 1px solid #CBD5E1;
+      border-radius: 7px;
+      font-size: 0.81rem;
+      font-weight: 500;
+      color: var(--lf-text-main);
+      background-color: #FFFFFF;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .cell-input:focus {
+      outline: none;
+      border-color: var(--lf-burgundy);
+      box-shadow: 0 0 0 3px rgba(134, 38, 51, 0.14);
+    }
+
+    .cell-input-num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      min-width: 68px;
+    }
+
+    .cell-input-text {
+      min-width: 120px;
+    }
+
+    /* Lifecycle Status Badges */
+    .status-select {
+      padding: 4px 6px;
+      border-radius: 7px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      border: 1px solid #CBD5E1;
+      cursor: pointer;
+    }
+
+    .status-Active { background-color: #ECFDF5; color: #065F46; border-color: #A7F3D0; }
+    .status-New-Joiner { background-color: #EFF6FF; color: #1E40AF; border-color: #BFDBFE; }
+    .status-Mover { background-color: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+    .status-Leaver { background-color: #FFF1F2; color: #9F1239; border-color: #FECDD3; }
+
+    /* Custom Notification Toast */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast-msg {
+      background: var(--lf-navy);
+      color: #FFFFFF;
+      border-left: 5px solid var(--lf-gold);
+      padding: 13px 18px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.22);
+      font-size: 0.86rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.25s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .modal-backdrop {
+      background: rgba(15, 23, 42, 0.62);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       1. CORPORATE HEADER BAR (LINCOLN FINANCIAL PALETTE)
+       ======================================================================== -->
+  <header class="lf-header text-white py-4 px-4 sm:px-8">
+    <div class="max-w-[1520px] mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div class="flex items-start sm:items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0 shadow-inner">
+          <i class="fa-solid fa-headset text-2xl" style="color: var(--lf-gold);"></i>
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">BPO Call Centre Payroll & Multi-Team Manager</h1>
+            <span class="lf-badge-gold text-xs px-2.5 py-0.5 rounded-full">Lincoln Financial Process Suite</span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-200 mt-1">
+            Persistent Multi-Team Rosters • Manual Salary & WFM Entry • Pro-Rata, Night Shift & KPI Incentives • Multi-Sheet Excel Export
+          </p>
+        </div>
+      </div>
+
+      <!-- Sync Status Badge & Backup Controls -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div id="syncStatusPill" class="bg-white/10 border border-white/20 rounded-xl px-3.5 py-2 flex items-center gap-2 text-xs">
+          <span id="syncDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="syncLabel" class="font-semibold text-slate-100">Initializing Storage...</span>
+        </div>
+
+        <button onclick="exportJsonBackup()" title="Download Raw JSON Backup of All Teams"
+                class="bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl px-3 py-2 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer">
+          <i class="fa-solid fa-download text-amber-300"></i>
+          <span>Backup JSON</span>
+        </button>
+
+        <label title="Restore All Teams from a JSON Backup File"
+               class="bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl px-3 py-2 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer">
+          <i class="fa-solid fa-upload text-amber-300"></i>
+          <span>Restore JSON</span>
+          <input type="file" id="jsonImportInput" accept=".json" class="hidden" onchange="importJsonBackup(event)" />
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       2. MULTI-TEAM MANAGEMENT & CYCLE CONTROL BAR
+       ======================================================================== -->
+  <div class="team-bar py-3.5 px-4 sm:px-8">
+    <div class="max-w-[1520px] mx-auto flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+      
+      <!-- Left: Team Selector & Team CRUD Actions -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="flex items-center gap-2 bg-[#eef4fb] border border-[#bfd4ee] rounded-xl px-3 py-1.5">
+          <i class="fa-solid fa-people-group text-[#002D62]"></i>
+          <label for="teamSelector" class="text-xs font-bold uppercase tracking-wider text-[#002D62]">Active Team:</label>
+          <select id="teamSelector" onchange="switchTeam(this.value)"
+                  class="bg-white text-[#002D62] font-bold text-sm rounded-lg px-3 py-1.5 border border-slate-300 focus:outline-none focus:border-[#862633] min-w-[210px]">
+          </select>
+        </div>
+
+        <button onclick="openTeamModal('create')" class="btn-navy px-3.5 py-2 text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-folder-plus text-[#C59B27]"></i>
+          <span>New Team</span>
+        </button>
+
+        <button onclick="openTeamModal('rename')" class="btn-outline px-3 py-2 text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-pen-to-square text-[#002D62]"></i>
+          <span>Rename</span>
+        </button>
+
+        <button onclick="openDeleteTeamModal()" class="btn-outline px-3 py-2 text-xs sm:text-sm flex items-center gap-1.5 text-[#862633] hover:bg-rose-50 cursor-pointer">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>Delete Team</span>
+        </button>
+      </div>
+
+      <!-- Right: Pay Cycle Label, Currency & Next Payroll Run Rollover -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+          <i class="fa-regular fa-calendar-check text-[#862633] text-sm"></i>
+          <span class="text-xs font-semibold text-slate-500">Cycle:</span>
+          <input type="text" id="payPeriodInput" onchange="updateTeamSetting('payPeriod', this.value)"
+                 class="bg-transparent text-[#002D62] font-bold text-xs sm:text-sm border-b border-slate-300 focus:border-[#862633] focus:outline-none w-44" />
+        </div>
+
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+          <i class="fa-solid fa-coins text-[#C59B27] text-sm"></i>
+          <select id="currencySelect" onchange="updateTeamSetting('currency', this.value)"
+                  class="bg-transparent text-[#002D62] font-bold text-xs sm:text-sm focus:outline-none cursor-pointer">
+            <option value="ZAR">ZAR (R)</option>
+            <option value="USD">USD ($)</option>
+          </select>
+        </div>
+
+        <button onclick="openNextCycleModal()" title="Keep all team members, salaries & tax rates, and reset monthly OT/Night hours for the next payroll run"
+                class="btn-gold px-3.5 py-2 text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-forward-step"></i>
+          <span>Start Next Payroll Run</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       3. MAIN WORKSPACE CONTAINER
+       ======================================================================== -->
+  <main class="max-w-[1520px] mx-auto px-4 sm:px-8 py-6 space-y-6">
+
+    <!-- EXECUTIVE KPI SUMMARY CARDS -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div class="kpi-card kpi-navy p-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Team Headcount</span>
+          <span class="w-8 h-8 rounded-lg bg-blue-50 text-[#002D62] flex items-center justify-center">
+            <i class="fa-solid fa-users text-sm"></i>
+          </span>
+        </div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="kpiHeadcount" class="text-2xl font-extrabold text-[#002D62]">0</span>
+          <span class="text-xs text-slate-500 font-medium">Saved Members</span>
+        </div>
+        <p id="kpiAttendanceNote" class="text-[11px] text-slate-500 mt-1">0 Pro-Rata / LWP days adjusted</p>
+      </div>
+
+      <div class="kpi-card kpi-navy p-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Gross Pay</span>
+          <span class="w-8 h-8 rounded-lg bg-blue-50 text-[#002D62] flex items-center justify-center">
+            <i class="fa-solid fa-sack-dollar text-sm"></i>
+          </span>
+        </div>
+        <div class="mt-2">
+          <span id="kpiTotalGross" class="text-2xl font-extrabold text-[#002D62]">R 0.00</span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1">Base + Allowances + KPIs</p>
+      </div>
+
+      <div class="kpi-card kpi-gold p-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Shift, OT & KPI Pay</span>
+          <span class="w-8 h-8 rounded-lg bg-amber-50 text-[#92400E] flex items-center justify-center">
+            <i class="fa-solid fa-moon text-sm"></i>
+          </span>
+        </div>
+        <div class="mt-2">
+          <span id="kpiTotalVariable" class="text-2xl font-extrabold text-[#92400E]">R 0.00</span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1">Night Diff + OT + QA/Manual Bonus</p>
+      </div>
+
+      <div class="kpi-card kpi-burgundy p-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Statutory Deductions</span>
+          <span class="w-8 h-8 rounded-lg bg-rose-50 text-[#862633] flex items-center justify-center">
+            <i class="fa-solid fa-landmark text-sm"></i>
+          </span>
+        </div>
+        <div class="mt-2">
+          <span id="kpiTotalDeductions" class="text-2xl font-extrabold text-[#862633]">R 0.00</span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1">PAYE Tax + UIF / Social Sec.</p>
+      </div>
+
+      <div class="kpi-card kpi-teal p-4 bg-gradient-to-br from-white to-teal-50/40">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-teal-800">Net Disbursement</span>
+          <span class="w-8 h-8 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center">
+            <i class="fa-solid fa-building-columns text-sm"></i>
+          </span>
+        </div>
+        <div class="mt-2">
+          <span id="kpiTotalNet" class="text-2xl font-extrabold text-teal-900">R 0.00</span>
+        </div>
+        <p class="text-[11px] text-teal-700 font-medium mt-1">Ready for Bank EFT File</p>
+      </div>
+    </section>
+
+    <!-- TEAM-SPECIFIC POLICY PARAMETERS BAR -->
+    <section class="ledger-panel p-4 sm:p-5">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-[#002D62] flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-[#862633]"></i>
+            Team Policy & WFM Rate Rules (<span id="policyTeamTitle" class="text-[#862633]">Active Team</span>)
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Saved per team—customize shift differentials, overtime multipliers, or statutory rates for each process.</p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+            <label class="block text-[11px] font-semibold text-slate-500">Standard Hrs / Day</label>
+            <input type="number" id="ruleHoursPerDay" value="8" min="1" max="12" step="0.5"
+                   onchange="updateTeamSetting('hoursPerDay', parseFloat(this.value) || 8)"
+                   class="w-full mt-0.5 font-bold text-sm text-[#002D62] bg-transparent focus:outline-none" />
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+            <label class="block text-[11px] font-semibold text-slate-500">Night Shift Diff (%)</label>
+            <input type="number" id="ruleNightPct" value="15" min="0" max="100" step="1"
+                   onchange="updateTeamSetting('nightPct', parseFloat(this.value) || 0)"
+                   class="w-full mt-0.5 font-bold text-sm text-[#002D62] bg-transparent focus:outline-none" />
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+            <label class="block text-[11px] font-semibold text-slate-500">Overtime Multiplier</label>
+            <input type="number" id="ruleOtMult" value="1.5" min="1" max="3" step="0.1"
+                   onchange="updateTeamSetting('otMult', parseFloat(this.value) || 1.5)"
+                   class="w-full mt-0.5 font-bold text-sm text-[#002D62] bg-transparent focus:outline-none" />
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+            <label class="block text-[11px] font-semibold text-slate-500">UIF / Social Rate (%)</label>
+            <input type="number" id="ruleUifPct" value="1.0" min="0" max="15" step="0.1"
+                   onchange="updateTeamSetting('uifPct', parseFloat(this.value) || 0)"
+                   class="w-full mt-0.5 font-bold text-sm text-[#862633] bg-transparent focus:outline-none" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTION TOOLBAR & INTERACTIVE PAYROLL REGISTER -->
+    <section class="ledger-panel overflow-hidden">
+      <!-- Action Toolbar -->
+      <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button onclick="openAddEmployeeModal()" class="btn-navy px-4 py-2.5 text-xs sm:text-sm flex items-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-user-plus text-[#C59B27]"></i>
+            <span>Add Employee Manually</span>
+          </button>
+
+          <button onclick="addQuickBlankRow()" class="btn-outline px-3.5 py-2.5 text-xs sm:text-sm flex items-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-plus text-[#002D62]"></i>
+            <span>Quick Blank Row</span>
+          </button>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Filter name, ID, role..."
+                   class="pl-8 pr-3 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:outline-none focus:border-[#002D62] w-48 sm:w-56" />
+          </div>
+
+          <button onclick="exportCurrentTeamExcel()" class="btn-burgundy px-4 py-2.5 text-xs sm:text-sm flex items-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-file-excel text-base"></i>
+            <span>Export Team (.xlsx)</span>
+          </button>
+
+          <button onclick="exportAllTeamsExcel()" title="Export all saved teams into a consolidated multi-tab Excel workbook"
+                  class="btn-outline px-3.5 py-2.5 text-xs sm:text-sm flex items-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-layer-group text-[#862633]"></i>
+            <span>All Teams (.xlsx)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Responsive Scrollable Payroll Register Table -->
+      <div class="overflow-x-auto max-h-[600px]">
+        <table class="payroll-table" id="payrollTable">
+          <thead>
+            <tr>
+              <th class="text-left pl-4">Emp ID</th>
+              <th class="text-left">Full Name</th>
+              <th class="text-left">Role / Process</th>
+              <th class="text-left">Lifecycle Status</th>
+              <th class="text-right">Base Monthly</th>
+              <th class="text-right" title="Scheduled Working Days">Sched</th>
+              <th class="text-right" title="Actual Days Worked">Worked</th>
+              <th class="text-right" title="Night Shift Hours">Night Hrs</th>
+              <th class="text-right" title="Approved Overtime Hours">OT Hrs</th>
+              <th class="text-right" title="QA / CSAT Score %">QA %</th>
+              <th class="text-right" title="Manual Bonus / Commission Override">Manual Bonus</th>
+              <th class="text-right" title="WFH Internet / Expense Stipend">WFH Stipend</th>
+              <th class="text-right" title="Individual PAYE Income Tax %">PAYE %</th>
+
+              <!-- Calculated Output Columns -->
+              <th class="text-right calc-header">Pro-Rata Base</th>
+              <th class="text-right calc-header">Shift + OT</th>
+              <th class="text-right calc-header">Total Bonus</th>
+              <th class="text-right calc-header">Gross Pay</th>
+              <th class="text-right calc-header">PAYE + UIF</th>
+              <th class="text-right calc-header">Net Pay</th>
+              <th class="text-center pr-4">Del</th>
+            </tr>
+          </thead>
+          <tbody id="payrollTableBody">
+            <!-- Populated dynamically via JavaScript -->
+          </tbody>
+          <tfoot id="payrollTableFoot" class="bg-slate-100 font-bold text-slate-800 border-t-2 border-[#002D62]">
+            <!-- Totals row populated dynamically -->
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Empty State Banner (Shown when a newly created team has 0 employees) -->
+      <div id="emptyTeamBanner" class="hidden py-12 px-6 text-center bg-slate-50/70">
+        <div class="w-14 h-14 rounded-2xl bg-[#eef4fb] text-[#002D62] flex items-center justify-center mx-auto mb-3 border border-[#bfd4ee]">
+          <i class="fa-solid fa-user-plus text-2xl"></i>
+        </div>
+        <h3 class="text-base font-bold text-[#002D62]">This Team Roster is Ready for Your Entries</h3>
+        <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto mt-1">
+          Click <strong>"Add Employee Manually"</strong> to enter each agent's ID, name, salary, shift hours, and tax rate. Everything saves automatically for future payroll runs.
+        </p>
+        <button onclick="openAddEmployeeModal()" class="btn-burgundy px-5 py-2.5 text-xs sm:text-sm mt-4 inline-flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-plus"></i>
+          <span>Add First Team Member</span>
+        </button>
+      </div>
+
+      <!-- Formula Legend Footer -->
+      <div class="bg-slate-50 px-5 py-3.5 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-600">
+        <div class="flex flex-wrap items-center gap-4">
+          <span><strong class="text-[#002D62]">QA Incentive Tiers:</strong> &ge;95% = 12% of Pro-Rata Base | 88%–94% = 6% | &lt;88% = 0% (+ Manual Bonus)</span>
+          <span><strong class="text-[#862633]">Auto-Save:</strong> All edits save immediately to Cloud &amp; Local Storage</span>
+        </div>
+        <div class="text-slate-500 italic">
+          Edit any white cell directly in the ledger to recalculate in real time.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================================================================
+       4. ADD EMPLOYEE MODAL (FULL MANUAL INPUT)
+       ======================================================================== -->
+  <div id="addEmployeeModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+      <div class="bg-[#002D62] text-white px-6 py-4 border-b-4 border-[#C59B27] flex items-center justify-between shrink-0">
+        <h3 class="font-bold text-lg flex items-center gap-2">
+          <i class="fa-solid fa-user-plus text-[#C59B27]"></i>
+          Add Employee to <span id="modalTeamNameLabel" class="text-amber-300">Team</span>
+        </h3>
+        <button onclick="closeAddEmployeeModal()" class="text-slate-300 hover:text-white text-lg cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="addEmployeeForm" onsubmit="handleAddEmployeeSubmit(event)" class="p-6 space-y-4 overflow-y-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Employee ID *</label>
+            <input type="text" id="inpEmpId" required placeholder="e.g., EXL-5012" class="cell-input" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Employee Full Name *</label>
+            <input type="text" id="inpEmpName" required placeholder="e.g., Thabo Mokoena" class="cell-input" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Role / Process Band *</label>
+            <input type="text" id="inpEmpRole" required placeholder="e.g., CSR Agent / SME / TL" value="CSR Agent" class="cell-input" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Lifecycle Status</label>
+            <select id="inpEmpStatus" class="cell-input">
+              <option value="Active">Active</option>
+              <option value="New Joiner">New Joiner (Pro-Rata)</option>
+              <option value="Mover">Mover / Promoted</option>
+              <option value="Leaver">Leaver (F&amp;F Settlement)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Monthly Base Salary *</label>
+            <input type="number" id="inpEmpBase" required placeholder="0.00" min="0" step="0.01" class="cell-input" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-100">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Scheduled Days</label>
+            <input type="number" id="inpEmpSched" value="22" min="1" max="31" step="0.5" class="cell-input" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Actual Days Worked</label>
+            <input type="number" id="inpEmpWorked" value="22" min="0" max="31" step="0.5" class="cell-input" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Night Shift Hours</label>
+            <input type="number" id="inpEmpNight" value="0" min="0" step="0.5" class="cell-input" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Overtime Hours</label>
+            <input type="number" id="inpEmpOt" value="0" min="0" step="0.5" class="cell-input" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-100">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">QA / CSAT Score (%)</label>
+            <input type="number" id="inpEmpQa" value="90" min="0" max="100" step="0.1" class="cell-input" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Manual Bonus / Comm.</label>
+            <input type="number" id="inpEmpManualBonus" value="0" min="0" step="0.01" class="cell-input" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">WFH Stipend</label>
+            <input type="number" id="inpEmpWfh" value="0" min="0" step="0.01" class="cell-input" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">PAYE Tax Rate (%)</label>
+            <input type="number" id="inpEmpTax" value="18" min="0" max="60" step="0.1" class="cell-input" />
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-200 flex justify-end gap-3">
+          <button type="button" onclick="closeAddEmployeeModal()" class="btn-outline px-4 py-2 text-xs sm:text-sm cursor-pointer">Cancel</button>
+          <button type="submit" class="btn-burgundy px-5 py-2 text-xs sm:text-sm cursor-pointer">Save Member to Team</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       5. CREATE / RENAME TEAM MODAL
+       ======================================================================== -->
+  <div id="teamModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl overflow-hidden">
+      <div class="bg-[#002D62] text-white px-6 py-4 border-b-4 border-[#C59B27] flex items-center justify-between">
+        <h3 id="teamModalTitle" class="font-bold text-lg">Create New Call Centre Team</h3>
+        <button onclick="closeTeamModal()" class="text-slate-300 hover:text-white text-lg cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleTeamModalSubmit(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Team / Process Name *</label>
+          <input type="text" id="teamNameInput" required placeholder="e.g., Lincoln Annuity Operations" class="cell-input" />
+        </div>
+
+        <div id="newTeamCycleWrapper">
+          <label class="block text-xs font-bold text-slate-700 mb-1">Initial Payroll Cycle Label</label>
+          <input type="text" id="teamCycleInput" value="Nov 2026 (Cut-Off: 15th)" class="cell-input" />
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
+          <button type="button" onclick="closeTeamModal()" class="btn-outline px-4 py-2 text-xs sm:text-sm cursor-pointer">Cancel</button>
+          <button type="submit" id="teamModalSubmitBtn" class="btn-navy px-5 py-2 text-xs sm:text-sm cursor-pointer">Create Team</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       6. START NEXT PAYROLL RUN CONFIRMATION MODAL
+       ======================================================================== -->
+  <div id="nextCycleModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl overflow-hidden">
+      <div class="bg-[#862633] text-white px-6 py-4 border-b-4 border-[#C59B27] flex items-center justify-between">
+        <h3 class="font-bold text-lg flex items-center gap-2">
+          <i class="fa-solid fa-forward-step text-[#C59B27]"></i>
+          Start Next Payroll Run
+        </h3>
+        <button onclick="closeNextCycleModal()" class="text-slate-200 hover:text-white text-lg cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <p class="text-sm text-slate-700 leading-relaxed">
+          This prepares <strong><span id="nextCycleTeamName"></span></strong> for the upcoming month while keeping all saved employee records intact:
+        </p>
+        <ul class="text-xs text-slate-600 space-y-1.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+          <li><i class="fa-solid fa-check text-teal-600 mr-1.5"></i><strong>Preserves:</strong> Employee IDs, Names, Roles, Base Salaries, PAYE %, &amp; WFH Stipends</li>
+          <li><i class="fa-solid fa-rotate text-[#862633] mr-1.5"></i><strong>Resets:</strong> Night Shift Hrs &rarr; 0, Overtime Hrs &rarr; 0, Manual Bonus &rarr; 0, Days Worked &rarr; Scheduled Days</li>
+        </ul>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">New Payroll Cycle Label</label>
+          <input type="text" id="nextCycleLabelInput" value="Dec 2026 (Cut-Off: 15th)" class="cell-input" />
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
+          <button type="button" onclick="closeNextCycleModal()" class="btn-outline px-4 py-2 text-xs sm:text-sm cursor-pointer">Cancel</button>
+          <button type="button" onclick="confirmNextPayrollRun()" class="btn-burgundy px-5 py-2 text-xs sm:text-sm cursor-pointer">Roll Over to Next Run</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       7. DELETE TEAM CONFIRMATION MODAL
+       ======================================================================== -->
+  <div id="deleteTeamModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl overflow-hidden">
+      <div class="bg-[#862633] text-white px-6 py-4 flex items-center justify-between">
+        <h3 class="font-bold text-lg">Delete Team Roster?</h3>
+        <button onclick="closeDeleteTeamModal()" class="text-slate-200 hover:text-white text-lg cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <p class="text-sm text-slate-700">
+          Are you sure you want to delete <strong><span id="deleteTeamNameSpan"></span></strong> and all its saved employee payroll entries?
+        </p>
+        <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
+          <button type="button" onclick="closeDeleteTeamModal()" class="btn-outline px-4 py-2 text-xs sm:text-sm cursor-pointer">Cancel</button>
+          <button type="button" onclick="confirmDeleteTeam()" class="btn-burgundy px-5 py-2 text-xs sm:text-sm cursor-pointer">Delete Permanently</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- ========================================================================
+       8. PERSISTENT MULTI-TEAM STORAGE (FIREBASE + LOCAL FALLBACK) & ENGINE
+       ======================================================================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const LOCAL_STORAGE_KEY = 'lf_bpo_multiteam_payroll_v1';
+
+    // Default starter structure if no saved teams exist yet
+    function createDefaultWorkspace() {
+      return {
+        activeTeamId: 'team-lincoln-annuity',
+        teams: {
+          'team-lincoln-annuity': {
+            id: 'team-lincoln-annuity',
+            name: 'Lincoln Annuity Operations',
+            payPeriod: 'Nov 2026 (Cut-Off: 15th)',
+            currency: 'ZAR',
+            hoursPerDay: 8,
+            nightPct: 15,
+            otMult: 1.5,
+            uifPct: 1.0,
+            employees: [
+              {
+                id: 'EXL-4011',
+                name: 'Amara Ndlovu',
+                role: 'Team Leader',
+                status: 'Active',
+                baseSalary: 26500,
+                schedDays: 22,
+                daysWorked: 22,
+                nightHours: 32,
+                otHours: 6,
+                qaScore: 96,
+                manualBonus: 1200,
+                wfhStipend: 850,
+                payeRate: 24.0
+              },
+              {
+                id: 'EXL-4082',
+                name: 'Liam Van Der Merwe',
+                role: 'Senior SME',
+                status: 'Mover',
+                baseSalary: 18500,
+                schedDays: 22,
+                daysWorked: 22,
+                nightHours: 48,
+                otHours: 10.5,
+                qaScore: 95,
+                manualBonus: 0,
+                wfhStipend: 650,
+                payeRate: 20.5
+              },
+              {
+                id: 'EXL-4201',
+                name: 'Chloe Pillay',
+                role: 'CSR Agent',
+                status: 'New Joiner',
+                baseSalary: 13200,
+                schedDays: 22,
+                daysWorked: 14,
+                nightHours: 16,
+                otHours: 0,
+                qaScore: 86,
+                manualBonus: 0,
+                wfhStipend: 450,
+                payeRate: 18.0
+              }
+            ]
+          },
+          'team-lincoln-claims': {
+            id: 'team-lincoln-claims',
+            name: 'Lincoln Claims & Policy Support',
+            payPeriod: 'Nov 2026 (Cut-Off: 15th)',
+            currency: 'ZAR',
+            hoursPerDay: 8,
+            nightPct: 15,
+            otMult: 1.5,
+            uifPct: 1.0,
+            employees: []
+          }
+        }
+      };
+    }
+
+    let workspace = createDefaultWorkspace();
+    let db = null;
+    let userId = null;
+    let appId = typeof __app_id !== 'undefined' ? __app_id : 'bpo-payroll-app';
+    let saveDebounceTimer = null;
+    let teamModalMode = 'create';
+
+    // Update Sync Indicator UI
+    function setSyncStatus(mode, text) {
+      const dot = document.getElementById('syncDot');
+      const label = document.getElementById('syncLabel');
+      label.textContent = text;
+      dot.className = 'w-2.5 h-2.5 rounded-full ';
+      if (mode === 'cloud') dot.className += 'bg-emerald-400';
+      else if (mode === 'saving') dot.className += 'bg-amber-400 animate-ping';
+      else dot.className += 'bg-sky-400';
+    }
+
+    // Save workspace to localStorage immediately + debounce write to Firestore
+    function persistWorkspace() {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(workspace));
+      } catch (e) {
+        console.warn('Local storage write skipped:', e);
+      }
+
+      if (db && userId) {
+        setSyncStatus('saving', 'Saving...');
+        clearTimeout(saveDebounceTimer);
+        saveDebounceTimer = setTimeout(async () => {
+          try {
+            const docRef = doc(db, 'artifacts', appId, 'users', userId, 'payrollWorkspace', 'main');
+            await setDoc(docRef, {
+              payload: JSON.stringify(workspace),
+              updatedAt: new Date().toISOString()
+            });
+            setSyncStatus('cloud', 'Cloud & Local Saved');
+          } catch (err) {
+            console.error('Cloud save error:', err);
+            setSyncStatus('local', 'Saved Locally');
+          }
+        }, 500);
+      } else {
+        setSyncStatus('local', 'Saved Locally');
+      }
+    }
+
+    // Initialize Firebase + Load Saved Teams
+    async function initStorageAndBoot() {
+      // 1. Load local backup first for instant startup
+      try {
+        const localRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (localRaw) {
+          const parsed = JSON.parse(localRaw);
+          if (parsed && parsed.teams && Object.keys(parsed.teams).length > 0) {
+            workspace = parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('Local read fallback:', e);
+      }
+
+      renderWorkspaceUI();
+
+      // 2. Connect to Firebase Firestore if configured in environment
+      try {
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+          const firebaseConfig = JSON.parse(__firebase_config);
+          const app = initializeApp(firebaseConfig);
+          const auth = getAuth(app);
+          db = getFirestore(app);
+
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+
+          userId = auth.currentUser?.uid;
+          if (userId) {
+            const docRef = doc(db, 'artifacts', appId, 'users', userId, 'payrollWorkspace', 'main');
+            const snap = await getDoc(docRef);
+            if (snap.exists() && snap.data().payload) {
+              const cloudData = JSON.parse(snap.data().payload);
+              if (cloudData && cloudData.teams && Object.keys(cloudData.teams).length > 0) {
+                workspace = cloudData;
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(workspace));
+                renderWorkspaceUI();
+              }
+            } else {
+              // Seed initial workspace to cloud
+              await setDoc(docRef, {
+                payload: JSON.stringify(workspace),
+                updatedAt: new Date().toISOString()
+              });
+            }
+            setSyncStatus('cloud', 'Cloud & Local Saved');
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Running in local persistent mode:', err);
+      }
+
+      setSyncStatus('local', 'Saved Locally');
+    }
+
+    // Helper: Get currently selected team object
+    function getActiveTeam() {
+      if (!workspace.teams[workspace.activeTeamId]) {
+        const firstKey = Object.keys(workspace.teams)[0];
+        workspace.activeTeamId = firstKey;
+      }
+      return workspace.teams[workspace.activeTeamId];
+    }
+
+    // Format Currency according to active team's currency setting
+    function formatMoney(amount, currencyOverride = null) {
+      const team = getActiveTeam();
+      const currency = currencyOverride || team.currency || 'ZAR';
+      const symbol = currency === 'USD' ? '$' : 'R ';
+      return symbol + Number(amount || 0).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    // Non-blocking Toast Banner
+    window.showToast = function(message, iconClass = 'fa-circle-check text-amber-300') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast-msg';
+      toast.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(20px)';
+        toast.style.transition = 'all 0.25s ease';
+        setTimeout(() => toast.remove(), 260);
+      }, 3400);
+    };
+
+    /**
+     * Core Payroll Calculation Engine for a Single Employee
+     */
+    function calculateEmployeePayroll(emp, team) {
+      const hoursPerDay = parseFloat(team.hoursPerDay) || 8;
+      const nightDiffPct = (parseFloat(team.nightPct) || 0) / 100;
+      const otMultiplier = parseFloat(team.otMult) || 1.5;
+      const uifPct = (parseFloat(team.uifPct) || 0) / 100;
+
+      const schedDays = Math.max(1, Number(emp.schedDays) || 22);
+      const daysWorked = Math.max(0, Number(emp.daysWorked) || 0);
+      const baseSalary = Math.max(0, Number(emp.baseSalary) || 0);
+
+      // 1. Hourly Rate & Pro-Rata Base Pay
+      const dailyRate = baseSalary / schedDays;
+      const hourlyRate = dailyRate / hoursPerDay;
+      const proRataBase = dailyRate * daysWorked;
+
+      // 2. Night Shift Differential & Overtime Pay
+      const nightAllowance = hourlyRate * nightDiffPct * (Number(emp.nightHours) || 0);
+      const overtimePay = hourlyRate * otMultiplier * (Number(emp.otHours) || 0);
+      const shiftAndOtTotal = nightAllowance + overtimePay;
+
+      // 3. QA / CSAT Tiered Incentive + Manual Bonus Override
+      const qa = Number(emp.qaScore) || 0;
+      let kpiBonusPct = 0;
+      let kpiTierLabel = '0%';
+      if (qa >= 95) {
+        kpiBonusPct = 0.12;
+        kpiTierLabel = '12%';
+      } else if (qa >= 88) {
+        kpiBonusPct = 0.06;
+        kpiTierLabel = '6%';
+      }
+      const qaIncentive = proRataBase * kpiBonusPct;
+      const manualBonus = Math.max(0, Number(emp.manualBonus) || 0);
+      const totalBonus = qaIncentive + manualBonus;
+
+      // 4. WFH Stipend & Gross Earnings
+      const wfhStipend = Math.max(0, Number(emp.wfhStipend) || 0);
+      const grossPay = proRataBase + shiftAndOtTotal + totalBonus + wfhStipend;
+
+      // 5. Statutory Deductions (PAYE Tax + UIF on taxable earnings)
+      const taxableEarnings = Math.max(0, grossPay - wfhStipend);
+      const payeAmount = taxableEarnings * ((Number(emp.payeRate) || 0) / 100);
+      const uifAmount = taxableEarnings * uifPct;
+      const totalDeductions = payeAmount + uifAmount;
+
+      // 6. Net Take-Home Pay
+      const netPay = Math.max(0, grossPay - totalDeductions);
+
+      return {
+        ...emp,
+        hourlyRate,
+        proRataBase,
+        nightAllowance,
+        overtimePay,
+        shiftAndOtTotal,
+        qaIncentive,
+        kpiTierLabel,
+        manualBonus,
+        totalBonus,
+        grossPay,
+        payeAmount,
+        uifAmount,
+        totalDeductions,
+        netPay
+      };
+    }
+
+    // Render Entire Workspace (Team Dropdown, Policy Inputs, Table, KPIs)
+    function renderWorkspaceUI() {
+      const team = getActiveTeam();
+
+      // Populate Team Selector Dropdown
+      const selector = document.getElementById('teamSelector');
+      selector.innerHTML = '';
+      Object.values(workspace.teams).forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = `${t.name} (${t.employees.length})`;
+        if (t.id === team.id) opt.selected = true;
+        selector.appendChild(opt);
+      });
+
+      // Populate Team-Specific Settings
+      document.getElementById('policyTeamTitle').textContent = team.name;
+      document.getElementById('payPeriodInput').value = team.payPeriod || 'Nov 2026 (Cut-Off: 15th)';
+      document.getElementById('currencySelect').value = team.currency || 'ZAR';
+      document.getElementById('ruleHoursPerDay').value = team.hoursPerDay ?? 8;
+      document.getElementById('ruleNightPct').value = team.nightPct ?? 15;
+      document.getElementById('ruleOtMult').value = team.otMult ?? 1.5;
+      document.getElementById('ruleUifPct').value = team.uifPct ?? 1.0;
+
+      renderTable();
+    }
+
+    // Update a Team Setting & Persist
+    window.updateTeamSetting = function(key, value) {
+      const team = getActiveTeam();
+      team[key] = value;
+      persistWorkspace();
+      renderTable();
+    };
+
+    // Switch Active Team
+    window.switchTeam = function(teamId) {
+      if (workspace.teams[teamId]) {
+        workspace.activeTeamId = teamId;
+        document.getElementById('searchInput').value = '';
+        persistWorkspace();
+        renderWorkspaceUI();
+        showToast(`Switched to "${workspace.teams[teamId].name}"`);
+      }
+    };
+
+    // Update Single Employee Field Inline
+    window.updateEmployeeField = function(index, field, rawValue) {
+      const team = getActiveTeam();
+      const numericFields = ['baseSalary', 'schedDays', 'daysWorked', 'nightHours', 'otHours', 'qaScore', 'manualBonus', 'wfhStipend', 'payeRate'];
+      if (numericFields.includes(field)) {
+        team.employees[index][field] = parseFloat(rawValue) || 0;
+      } else {
+        team.employees[index][field] = rawValue;
+      }
+
+      persistWorkspace();
+
+      // Update calculated cells in-place for smooth typing
+      const calc = calculateEmployeePayroll(team.employees[index], team);
+      const row = document.getElementById(`row-${index}`);
+      if (row) {
+        row.querySelector('.cell-prorata').textContent = formatMoney(calc.proRataBase);
+        row.querySelector('.cell-shiftot').textContent = formatMoney(calc.shiftAndOtTotal);
+        row.querySelector('.cell-bonus').innerHTML = `
+          <div class="font-semibold text-slate-800">${formatMoney(calc.totalBonus)}</div>
+          <div class="text-[10px] text-amber-800 font-semibold">QA ${calc.kpiTierLabel}${calc.manualBonus > 0 ? ' + Manual' : ''}</div>
+        `;
+        row.querySelector('.cell-gross').textContent = formatMoney(calc.grossPay);
+        row.querySelector('.cell-ded').textContent = '-' + formatMoney(calc.totalDeductions);
+        row.querySelector('.cell-net').textContent = formatMoney(calc.netPay);
+
+        if (field === 'status') {
+          const sel = row.querySelector('.status-select');
+          sel.className = `status-select status-${rawValue.replace(/\s+/g, '-')}`;
+        }
+      }
+
+      refreshKpiAndFooterTotals();
+    };
+
+    // Delete Employee Row
+    window.deleteEmployee = function(index) {
+      const team = getActiveTeam();
+      const removed = team.employees.splice(index, 1)[0];
+      persistWorkspace();
+      renderWorkspaceUI();
+      showToast(`Removed ${removed.name || 'Employee'} from ${team.name}`, 'fa-trash-can text-rose-300');
+    };
+
+    // Add Quick Blank Row Directly in Table
+    window.addQuickBlankRow = function() {
+      const team = getActiveTeam();
+      const nextNum = team.employees.length + 1;
+      team.employees.push({
+        id: `EMP-${String(nextNum).padStart(3, '0')}`,
+        name: '',
+        role: 'CSR Agent',
+        status: 'Active',
+        baseSalary: 0,
+        schedDays: 22,
+        daysWorked: 22,
+        nightHours: 0,
+        otHours: 0,
+        qaScore: 90,
+        manualBonus: 0,
+        wfhStipend: 0,
+        payeRate: 18
+      });
+      persistWorkspace();
+      renderWorkspaceUI();
+      showToast('Added blank row—type the employee name and figures directly.');
+    };
+
+    // Render Table Rows & Totals
+    window.renderTable = function() {
+      const team = getActiveTeam();
+      const tbody = document.getElementById('payrollTableBody');
+      const emptyBanner = document.getElementById('emptyTeamBanner');
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      tbody.innerHTML = '';
+
+      if (team.employees.length === 0) {
+        emptyBanner.classList.remove('hidden');
+      } else {
+        emptyBanner.classList.add('hidden');
+      }
+
+      team.employees.forEach((emp, idx) => {
+        const matchesSearch = !query ||
+          (emp.name || '').toLowerCase().includes(query) ||
+          (emp.id || '').toLowerCase().includes(query) ||
+          (emp.role || '').toLowerCase().includes(query);
+
+        if (!matchesSearch) return;
+
+        const calc = calculateEmployeePayroll(emp, team);
+        const statusSlug = (emp.status || 'Active').replace(/\s+/g, '-');
+
+        const tr = document.createElement('tr');
+        tr.id = `row-${idx}`;
+        tr.innerHTML = `
+          <td class="pl-4">
+            <input type="text" class="cell-input font-mono text-xs w-24" value="${emp.id || ''}" placeholder="ID"
+                   onchange="updateEmployeeField(${idx}, 'id', this.value)" />
+          </td>
+          <td>
+            <input type="text" class="cell-input cell-input-text font-semibold text-[#002D62]" value="${emp.name || ''}" placeholder="Enter Full Name..."
+                   onchange="updateEmployeeField(${idx}, 'name', this.value)" />
+          </td>
+          <td>
+            <input type="text" class="cell-input w-28" value="${emp.role || ''}" placeholder="Role / Band"
+                   onchange="updateEmployeeField(${idx}, 'role', this.value)" />
+          </td>
+          <td>
+            <select class="status-select status-${statusSlug}" onchange="updateEmployeeField(${idx}, 'status', this.value)">
+              <option value="Active" ${emp.status === 'Active' ? 'selected' : ''}>Active</option>
+              <option value="New Joiner" ${emp.status === 'New Joiner' ? 'selected' : ''}>New Joiner</option>
+              <option value="Mover" ${emp.status === 'Mover' ? 'selected' : ''}>Mover</option>
+              <option value="Leaver" ${emp.status === 'Leaver' ? 'selected' : ''}>Leaver (F&amp;F)</option>
+            </select>
+          </td>
+          <td>
+            <input type="number" class="cell-input cell-input-num" value="${emp.baseSalary}" min="0" step="100"
+                   onchange="updateEmployeeField(${idx}, 'baseSalary', this.value)" />
+          </td>
+          <td>
+            <input type="number" class="cell-input cell-input-num w-14" value="${emp.schedDays}" min="1" max="31" step="0.5"
+                   onchange="updateEmployeeField(${idx}, 'schedDays', this.value)" />
+          </td>
+          <td>
+            <input type="number" class="cell-input cell-input-num w-14 ${emp.daysWorked < emp.schedDays ? 'border-amber-400 bg-amber-50/50' : ''}"
+                   value="${emp.daysWorked}" min="0" max="31" step="0.5"
+                   onchange="updateEmployeeField(${idx}, 'daysWorked', this.value)" />
+          </td>
+          <td>
+            <input type="number" class="cell-input cell-input-num w-14" value="${emp.nightHours}" min="0" step="0.5"
+                   onchange="updateEmployeeField(${idx}, 'nightHours', this.value)" />
+          </td>
+          <td>
+            <input type="number" class="cell-input cell-input-num w-14" value="${emp.otHours}" min="0" step="0.5"
+                   onchange="updateEmployeeField(${idx}, 'otHours', this.value)" />
+          </td>
+          <td>
+            <input type="number" class="cell-input cell-input-num w-14" value="${emp.qaScore}" min="0" max="100" step="0.5"
+                   onchange="updateEmployeeField(${idx}, 'qaScore', this.value)" />
+          </td>
+          <td>
+            <input type="number" class="cell-input cell-input-num w-20" value="${emp.manualBonus || 0}" min="0" step="50"
+                   onchange="updateEmployeeField(${idx}, 'manualBonus', this.value)" />
+          </td>
+          <td>
+            <input type="number" class="cell-input cell-input-num w-20" value="${emp.wfhStipend}" min="0" step="50"
+                   onchange="updateEmployeeField(${idx}, 'wfhStipend', this.value)" />
+          </td>
+          <td>
+            <input type="number" class="cell-input cell-input-num w-14" value="${emp.payeRate}" min="0" max="60" step="0.5"
+                   onchange="updateEmployeeField(${idx}, 'payeRate', this.value)" />
+          </td>
+
+          <!-- Computed Payroll Outputs -->
+          <td class="text-right font-semibold text-slate-700 whitespace-nowrap cell-prorata">
+            ${formatMoney(calc.proRataBase)}
+          </td>
+          <td class="text-right font-semibold text-[#002D62] whitespace-nowrap cell-shiftot">
+            ${formatMoney(calc.shiftAndOtTotal)}
+          </td>
+          <td class="text-right whitespace-nowrap cell-bonus">
+            <div class="font-semibold text-slate-800">${formatMoney(calc.totalBonus)}</div>
+            <div class="text-[10px] text-amber-800 font-semibold">QA ${calc.kpiTierLabel}${calc.manualBonus > 0 ? ' + Manual' : ''}</div>
+          </td>
+          <td class="text-right font-bold text-[#002D62] whitespace-nowrap cell-gross">
+            ${formatMoney(calc.grossPay)}
+          </td>
+          <td class="text-right font-semibold text-[#862633] whitespace-nowrap cell-ded">
+            -${formatMoney(calc.totalDeductions)}
+          </td>
+          <td class="text-right font-extrabold text-teal-800 bg-teal-50/60 whitespace-nowrap cell-net">
+            ${formatMoney(calc.netPay)}
+          </td>
+          <td class="text-center pr-4">
+            <button onclick="deleteEmployee(${idx})" title="Remove Employee"
+                    class="text-slate-400 hover:text-[#862633] p-1.5 rounded-lg hover:bg-rose-50 transition cursor-pointer">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      refreshKpiAndFooterTotals();
+    };
+
+    // Refresh Executive KPI Cards & Table Totals Footer
+    function refreshKpiAndFooterTotals() {
+      const team = getActiveTeam();
+      let totGross = 0, totVariable = 0, totDed = 0, totNet = 0, totDaysLost = 0;
+
+      team.employees.forEach(emp => {
+        const calc = calculateEmployeePayroll(emp, team);
+        totGross += calc.grossPay;
+        totVariable += (calc.shiftAndOtTotal + calc.totalBonus);
+        totDed += calc.totalDeductions;
+        totNet += calc.netPay;
+        totDaysLost += Math.max(0, calc.schedDays - calc.daysWorked);
+      });
+
+      document.getElementById('kpiHeadcount').textContent = team.employees.length;
+      document.getElementById('kpiAttendanceNote').textContent = `${totDaysLost} Pro-Rata / LWP days adjusted`;
+      document.getElementById('kpiTotalGross').textContent = formatMoney(totGross);
+      document.getElementById('kpiTotalVariable').textContent = formatMoney(totVariable);
+      document.getElementById('kpiTotalDeductions').textContent = formatMoney(totDed);
+      document.getElementById('kpiTotalNet').textContent = formatMoney(totNet);
+
+      const foot = document.getElementById('payrollTableFoot');
+      if (team.employees.length === 0) {
+        foot.innerHTML = '';
+        return;
+      }
+
+      foot.innerHTML = `
+        <tr>
+          <td colspan="13" class="py-3.5 px-4 text-right text-xs uppercase tracking-wider text-[#002D62]">
+            ${team.name} Totals (${team.employees.length} Team Members):
+          </td>
+          <td class="py-3.5 px-2 text-right text-xs text-slate-600">—</td>
+          <td class="py-3.5 px-2 text-right text-xs text-[#92400E]">${formatMoney(totVariable)}</td>
+          <td class="py-3.5 px-2 text-right text-xs text-slate-600">Incl.</td>
+          <td class="py-3.5 px-2 text-right text-sm text-[#002D62]">${formatMoney(totGross)}</td>
+          <td class="py-3.5 px-2 text-right text-xs text-[#862633]">-${formatMoney(totDed)}</td>
+          <td class="py-3.5 px-2 text-right text-sm text-teal-800 bg-teal-50/80">${formatMoney(totNet)}</td>
+          <td></td>
+        </tr>
+      `;
+    }
+
+    // ========================================================================
+    // MODAL HANDLERS (ADD EMPLOYEE, CREATE/RENAME TEAM, NEXT PAYROLL RUN)
+    // ========================================================================
+    window.openAddEmployeeModal = function() {
+      const team = getActiveTeam();
+      document.getElementById('modalTeamNameLabel').textContent = team.name;
+      const modal = document.getElementById('addEmployeeModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => document.getElementById('inpEmpId').focus(), 50);
+    };
+
+    window.closeAddEmployeeModal = function() {
+      const modal = document.getElementById('addEmployeeModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    window.handleAddEmployeeSubmit = function(e) {
+      e.preventDefault();
+      const team = getActiveTeam();
+      const newEmp = {
+        id: document.getElementById('inpEmpId').value.trim(),
+        name: document.getElementById('inpEmpName').value.trim(),
+        role: document.getElementById('inpEmpRole').value.trim() || 'CSR Agent',
+        status: document.getElementById('inpEmpStatus').value,
+        baseSalary: parseFloat(document.getElementById('inpEmpBase').value) || 0,
+        schedDays: parseFloat(document.getElementById('inpEmpSched').value) || 22,
+        daysWorked: parseFloat(document.getElementById('inpEmpWorked').value) || 22,
+        nightHours: parseFloat(document.getElementById('inpEmpNight').value) || 0,
+        otHours: parseFloat(document.getElementById('inpEmpOt').value) || 0,
+        qaScore: parseFloat(document.getElementById('inpEmpQa').value) || 0,
+        manualBonus: parseFloat(document.getElementById('inpEmpManualBonus').value) || 0,
+        wfhStipend: parseFloat(document.getElementById('inpEmpWfh').value) || 0,
+        payeRate: parseFloat(document.getElementById('inpEmpTax').value) || 18
+      };
+
+      team.employees.push(newEmp);
+      persistWorkspace();
+      closeAddEmployeeModal();
+      document.getElementById('addEmployeeForm').reset();
+      renderWorkspaceUI();
+      showToast(`Saved ${newEmp.name} (${newEmp.id}) to ${team.name}`);
+    };
+
+    // Create / Rename Team Modal
+    window.openTeamModal = function(mode) {
+      teamModalMode = mode;
+      const team = getActiveTeam();
+      const titleEl = document.getElementById('teamModalTitle');
+      const btnEl = document.getElementById('teamModalSubmitBtn');
+      const nameInput = document.getElementById('teamNameInput');
+      const cycleWrap = document.getElementById('newTeamCycleWrapper');
+
+      if (mode === 'rename') {
+        titleEl.textContent = 'Rename Active Team';
+        btnEl.textContent = 'Save Team Name';
+        nameInput.value = team.name;
+        cycleWrap.classList.add('hidden');
+      } else {
+        titleEl.textContent = 'Create New Call Centre Team';
+        btnEl.textContent = 'Create & Switch Team';
+        nameInput.value = '';
+        cycleWrap.classList.remove('hidden');
+      }
+
+      const modal = document.getElementById('teamModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => nameInput.focus(), 50);
+    };
+
+    window.closeTeamModal = function() {
+      const modal = document.getElementById('teamModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    window.handleTeamModalSubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('teamNameInput').value.trim();
+      if (!name) return;
+
+      if (teamModalMode === 'rename') {
+        const team = getActiveTeam();
+        team.name = name;
+        persistWorkspace();
+        closeTeamModal();
+        renderWorkspaceUI();
+        showToast(`Renamed team to "${name}"`);
+      } else {
+        const newId = 'team-' + Date.now();
+        const cycle = document.getElementById('teamCycleInput').value.trim() || 'Nov 2026 (Cut-Off: 15th)';
+        const currentTeam = getActiveTeam();
+        workspace.teams[newId] = {
+          id: newId,
+          name: name,
+          payPeriod: cycle,
+          currency: currentTeam.currency || 'ZAR',
+          hoursPerDay: currentTeam.hoursPerDay || 8,
+          nightPct: currentTeam.nightPct || 15,
+          otMult: currentTeam.otMult || 1.5,
+          uifPct: currentTeam.uifPct || 1.0,
+          employees: []
+        };
+        workspace.activeTeamId = newId;
+        persistWorkspace();
+        closeTeamModal();
+        renderWorkspaceUI();
+        showToast(`Created new team "${name}". Add your employees now!`);
+      }
+    };
+
+    // Delete Team Modal
+    window.openDeleteTeamModal = function() {
+      if (Object.keys(workspace.teams).length <= 1) {
+        showToast('At least one team must remain in the workspace.', 'fa-triangle-exclamation text-amber-300');
+        return;
+      }
+      const team = getActiveTeam();
+      document.getElementById('deleteTeamNameSpan').textContent = team.name;
+      const modal = document.getElementById('deleteTeamModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    };
+
+    window.closeDeleteTeamModal = function() {
+      const modal = document.getElementById('deleteTeamModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    window.confirmDeleteTeam = function() {
+      const team = getActiveTeam();
+      const deletedName = team.name;
+      delete workspace.teams[team.id];
+      workspace.activeTeamId = Object.keys(workspace.teams)[0];
+      persistWorkspace();
+      closeDeleteTeamModal();
+      renderWorkspaceUI();
+      showToast(`Deleted team "${deletedName}"`, 'fa-trash-can text-rose-300');
+    };
+
+    // Next Payroll Run Rollover Modal
+    window.openNextCycleModal = function() {
+      const team = getActiveTeam();
+      document.getElementById('nextCycleTeamName').textContent = team.name;
+      const modal = document.getElementById('nextCycleModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    };
+
+    window.closeNextCycleModal = function() {
+      const modal = document.getElementById('nextCycleModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    window.confirmNextPayrollRun = function() {
+      const team = getActiveTeam();
+      const newLabel = document.getElementById('nextCycleLabelInput').value.trim();
+      if (newLabel) team.payPeriod = newLabel;
+
+      team.employees.forEach(emp => {
+        emp.daysWorked = emp.schedDays;
+        emp.nightHours = 0;
+        emp.otHours = 0;
+        emp.manualBonus = 0;
+        if (emp.status === 'New Joiner') emp.status = 'Active';
+      });
+
+      persistWorkspace();
+      closeNextCycleModal();
+      renderWorkspaceUI();
+      showToast(`Rolled over "${team.name}" to ${team.payPeriod}. Monthly hours reset!`);
+    };
+
+    // ========================================================================
+    // EXCEL (.XLSX) EXPORT ENGINE (SINGLE TEAM & CONSOLIDATED ALL-TEAMS)
+    // ========================================================================
+    function buildTeamExportSheetData(team) {
+      const rows = team.employees.map(emp => {
+        const c = calculateEmployeePayroll(emp, team);
+        return {
+          'Team / Process': team.name,
+          'Employee ID': c.id,
+          'Employee Name': c.name,
+          'Role / Band': c.role,
+          'Lifecycle Status': c.status || 'Active',
+          'Currency': team.currency,
+          'Base Monthly Salary': Number(c.baseSalary.toFixed(2)),
+          'Scheduled Days': c.schedDays,
+          'Days Worked': c.daysWorked,
+          'Pro-Rata Base Pay': Number(c.proRataBase.toFixed(2)),
+          'Night Shift Hours': c.nightHours,
+          'Night Shift Allowance': Number(c.nightAllowance.toFixed(2)),
+          'Overtime Hours': c.otHours,
+          'Overtime Pay': Number(c.overtimePay.toFixed(2)),
+          'QA / CSAT Score (%)': c.qaScore,
+          'QA Tier': c.kpiTierLabel,
+          'QA Incentive Pay': Number(c.qaIncentive.toFixed(2)),
+          'Manual Bonus / Comm.': Number(c.manualBonus.toFixed(2)),
+          'WFH Internet Stipend': Number(c.wfhStipend.toFixed(2)),
+          'Gross Earnings': Number(c.grossPay.toFixed(2)),
+          'PAYE Tax Rate (%)': c.payeRate,
+          'PAYE Income Tax': Number(c.payeAmount.toFixed(2)),
+          'UIF / Social Security': Number(c.uifAmount.toFixed(2)),
+          'Total Statutory Deductions': Number(c.totalDeductions.toFixed(2)),
+          'Net Take-Home Pay': Number(c.netPay.toFixed(2))
+        };
+      });
+
+      const totals = rows.reduce((acc, r) => {
+        acc['Base Monthly Salary'] += r['Base Monthly Salary'];
+        acc['Pro-Rata Base Pay'] += r['Pro-Rata Base Pay'];
+        acc['Night Shift Allowance'] += r['Night Shift Allowance'];
+        acc['Overtime Pay'] += r['Overtime Pay'];
+        acc['QA Incentive Pay'] += r['QA Incentive Pay'];
+        acc['Manual Bonus / Comm.'] += r['Manual Bonus / Comm.'];
+        acc['WFH Internet Stipend'] += r['WFH Internet Stipend'];
+        acc['Gross Earnings'] += r['Gross Earnings'];
+        acc['PAYE Income Tax'] += r['PAYE Income Tax'];
+        acc['UIF / Social Security'] += r['UIF / Social Security'];
+        acc['Total Statutory Deductions'] += r['Total Statutory Deductions'];
+        acc['Net Take-Home Pay'] += r['Net Take-Home Pay'];
+        return acc;
+      }, {
+        'Team / Process': 'TOTAL',
+        'Employee ID': `${rows.length} Members`,
+        'Employee Name': team.payPeriod,
+        'Role / Band': '',
+        'Lifecycle Status': '',
+        'Currency': team.currency,
+        'Base Monthly Salary': 0,
+        'Scheduled Days': '',
+        'Days Worked': '',
+        'Pro-Rata Base Pay': 0,
+        'Night Shift Hours': '',
+        'Night Shift Allowance': 0,
+        'Overtime Hours': '',
+        'Overtime Pay': 0,
+        'QA / CSAT Score (%)': '',
+        'QA Tier': '',
+        'QA Incentive Pay': 0,
+        'Manual Bonus / Comm.': 0,
+        'WFH Internet Stipend': 0,
+        'Gross Earnings': 0,
+        'PAYE Tax Rate (%)': '',
+        'PAYE Income Tax': 0,
+        'UIF / Social Security': 0,
+        'Total Statutory Deductions': 0,
+        'Net Take-Home Pay': 0
+      });
+
+      Object.keys(totals).forEach(k => {
+        if (typeof totals[k] === 'number') totals[k] = Number(totals[k].toFixed(2));
+      });
+      rows.push(totals);
+      return rows;
+    }
+
+    window.exportCurrentTeamExcel = function() {
+      if (typeof XLSX === 'undefined') {
+        showToast('Excel generator is loading. Please try again in a second.', 'fa-triangle-exclamation text-amber-300');
+        return;
+      }
+
+      const team = getActiveTeam();
+      if (team.employees.length === 0) {
+        showToast('Add at least one employee before exporting to Excel.', 'fa-triangle-exclamation text-amber-300');
+        return;
+      }
+
+      const exportRows = buildTeamExportSheetData(team);
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(exportRows);
+      ws['!cols'] = Object.keys(exportRows[0]).map(k => ({ wch: Math.max(k.length + 4, 15) }));
+      XLSX.utils.book_append_sheet(wb, ws, 'Payroll_Register');
+
+      // Audit Log Tab
+      const auditRows = [
+        { Parameter: 'Team / Process Name', Value: team.name },
+        { Parameter: 'Payroll Cut-Off Cycle', Value: team.payPeriod },
+        { Parameter: 'Currency', Value: team.currency },
+        { Parameter: 'Export Timestamp', Value: new Date().toLocaleString() },
+        { Parameter: 'Standard Shift Hours / Day', Value: team.hoursPerDay },
+        { Parameter: 'Night Shift Differential (%)', Value: team.nightPct + '%' },
+        { Parameter: 'Overtime Multiplier', Value: team.otMult + 'x' },
+        { Parameter: 'Statutory UIF / Social Rate (%)', Value: team.uifPct + '%' }
+      ];
+      const wsAudit = XLSX.utils.json_to_sheet(auditRows);
+      wsAudit['!cols'] = [{ wch: 32 }, { wch: 40 }];
+      XLSX.utils.book_append_sheet(wb, wsAudit, 'Policy_Audit_Log');
+
+      const safeFile = `${team.name.replace(/[^a-zA-Z0-9]/g, '_')}_Payroll_${team.payPeriod.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`;
+      XLSX.writeFile(wb, safeFile);
+      showToast(`Exported "${safeFile}"!`, 'fa-file-excel text-emerald-300');
+    };
+
+    window.exportAllTeamsExcel = function() {
+      if (typeof XLSX === 'undefined') return;
+      const wb = XLSX.utils.book_new();
+      let sheetCount = 0;
+
+      Object.values(workspace.teams).forEach((team, idx) => {
+        if (team.employees.length === 0) return;
+        const rows = buildTeamExportSheetData(team);
+        const ws = XLSX.utils.json_to_sheet(rows);
+        ws['!cols'] = Object.keys(rows[0]).map(k => ({ wch: Math.max(k.length + 4, 15) }));
+        // Excel tab names have a 31-char limit
+        const tabName = `${idx + 1}_${team.name.replace(/[^a-zA-Z0-9]/g, '')}`.slice(0, 31);
+        XLSX.utils.book_append_sheet(wb, ws, tabName);
+        sheetCount++;
+      });
+
+      if (sheetCount === 0) {
+        showToast('No employees found across your teams to export.', 'fa-triangle-exclamation text-amber-300');
+        return;
+      }
+
+      const filename = `BPO_All_Teams_Consolidated_Payroll_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      XLSX.writeFile(wb, filename);
+      showToast(`Exported ${sheetCount} team tabs into "${filename}"!`, 'fa-file-excel text-emerald-300');
+    };
+
+    // JSON Backup & Restore
+    window.exportJsonBackup = function() {
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(workspace, null, 2));
+      const dlAnchor = document.createElement('a');
+      dlAnchor.setAttribute('href', dataStr);
+      dlAnchor.setAttribute('download', `BPO_Payroll_Backup_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(dlAnchor);
+      dlAnchor.click();
+      dlAnchor.remove();
+      showToast('Downloaded JSON backup of all teams & employee details.');
+    };
+
+    window.importJsonBackup = function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported && imported.teams && Object.keys(imported.teams).length > 0) {
+            workspace = imported;
+            persistWorkspace();
+            renderWorkspaceUI();
+            showToast('Restored all teams and employee payroll records from backup!');
+          } else {
+            showToast('Invalid payroll backup file format.', 'fa-triangle-exclamation text-amber-300');
+          }
+        } catch (err) {
+          showToast('Could not read JSON backup file.', 'fa-triangle-exclamation text-amber-300');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    };
+
+    // Start Application
+    window.addEventListener('DOMContentLoaded', initStorageAndBoot);
+  </script>
+</body>
+</html>
